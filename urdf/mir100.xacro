@@ -1,0 +1,329 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mir100">
+
+<xacro:include filename="$(find mir100_description)/urdf/wheel.urdf.xacro" /> 
+
+
+<!--                    Property list                             -->
+<!-- Robot's dimensions -->
+<xacro:property name="body_height" value="0.300" />
+<xacro:property name="body_width" value="0.550" />
+<xacro:property name="body_len" value="0.900" />
+<xacro:property name="robot_height" value="0.350" />
+
+<!-- Mathematical constant -->
+<xacro:property name="deg2rad" value="0.017453293" />
+
+<!-- Castor wheels -->
+<xacro:property name="base_x_origin_to_castorwheel_origin" value="0.310" />
+<xacro:property name="base_y_origin_to_castorwheel_origin" value="${base_y_origin_to_wheel_origin}" />
+
+<!-- Motor wheels -->
+<xacro:property name="wheel_radius" value="0.03" /> 
+<xacro:property name="wheel_thickness" value="0.03" />
+<xacro:property name="wheel_ext_s2s_distance" value="0.480" />
+<xacro:property name="base_x_origin_to_wheel_origin" value="0.0" />
+<xacro:property name="base_y_origin_to_wheel_origin" value="${(wheel_ext_s2s_distance-wheel_thickness)/2}" />
+<xacro:property name="base_z_origin_to_wheel_origin" value="${wheel_radius-robot_height}" />
+
+
+<!-- All mass in kg-->
+<xacro:property name="motor_wheel_mass" value="1.5" />
+<xacro:property name="castor_wheel_mass" value="1.5" />
+<xacro:property name="body_mass" value="10" />
+
+<!--                    Material definition                     -->
+<material name="black">
+	<color rgba="0 0 0 1"/>
+</material>
+
+<material name="white">
+	<color rgba="1 1 1 1"/>
+</material>
+
+<material name="blue">
+	<color rgba="0 0 0.8 1"/>
+</material>
+
+
+<!--                    Inertia basic shape macro                     -->
+<xacro:macro name="cylinder_inertia" params="m r h">
+  <inertia  ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+              iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+              izz="${m*r*r/2}" /> 
+</xacro:macro>
+
+<xacro:macro name="box_inertia" params="m x y z">
+  <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
+            iyy="${m*(x*x+z*z)/12}" iyz = "0"
+            izz="${m*(x*x+z*z)/12}" /> 
+</xacro:macro>
+
+<!--                    Base footprint                        -->
+<!-- Link that is on the ground right below base_link origin  -->
+<link name="base_footprint">
+  <inertial>
+    <mass value="0.0001" />
+    <origin xyz="0 0 0" />
+    <inertia 
+      ixx="0.0001" ixy="0.0" ixz="0.0"
+      iyy="0.0001" iyz="0.0" 
+      izz="0.0001" />
+  </inertial>
+  <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+          <box size="0.001 0.001 0.001" />
+      </geometry>
+  </visual>
+</link>
+
+<gazebo reference="base_footprint">
+  <turnGravityOff>false</turnGravityOff>
+</gazebo>
+
+<joint name="base_footprint_joint" type="fixed">
+  <origin xyz="0 0 ${robot_height}" rpy="0 0 0" />
+  <parent link="base_footprint"/>
+  <child link="base_link" />
+</joint>
+  
+<!--                    Base link                           -->
+<link name="base_link">
+	<visual>
+			<geometry>
+				<box size="${body_len} ${body_width} ${body_height}"/>
+			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 -${body_height/2}"/>
+		<material name="white"/>
+	</visual>
+	<collision>
+		<geometry>
+			<box size="${body_len} ${body_width} ${body_height}"/>
+		</geometry>
+		<origin rpy="0 0 0" xyz="0 0 -${body_height/2}"/>
+	</collision>
+	<inertial>
+		<mass value="${body_mass}"/>
+    <origin xyz="0 0 -${body_height/2}" /> <!-- center of gravity relative to the link's reference frame). -->
+		<box_inertia  m="${body_mass}" x="${body_len}" y="${body_width}" z="${body_height}" />
+	</inertial>
+</link>
+
+
+<gazebo reference="base_link">
+	<turnGravityOff>false</turnGravityOff>
+</gazebo>
+
+
+<!--                    Motor wheels                        -->
+<wheel lr="left" parent="base_link" translateX="0" translateY="1" flipY="1"/>
+<wheel lr="right" parent="base_link" translateX="0" translateY="-1" flipY="1"/>
+
+
+<!--                    Castor wheels                       -->
+<!-- Left front -->
+<link name="left_front_castor_wheel">
+	<visual>
+		<geometry>
+			<sphere radius="${wheel_radius}"/>
+		</geometry>
+		<material name="white"/>
+	</visual>
+  <collision>
+    <geometry>
+      <sphere radius="${wheel_radius}" />
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="${castor_wheel_mass}" />
+    <origin xyz="0 0 0" />        
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+             iyy="0.001" iyz="0.0" 
+             izz="0.001" />
+  </inertial>
+</link>
+
+<joint name="base_to_left_front_castor_wheel" type="fixed">
+	<parent link="base_link"/>
+	<child link="left_front_castor_wheel"/>
+	<origin rpy="0 0 0" xyz="${base_x_origin_to_castorwheel_origin} ${base_y_origin_to_castorwheel_origin} ${wheel_radius-robot_height}"/>
+</joint>
+
+<!-- Left rear -->
+<link name="left_rear_castor_wheel">
+	<visual>
+		<geometry>
+			<sphere radius="${wheel_radius}"/>
+		</geometry>	
+		<material name="white"/>
+	</visual>
+  <collision>
+    <geometry>
+      <sphere radius="${wheel_radius}" />
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="${castor_wheel_mass}" />
+    <origin xyz="0 0 0" />        
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+             iyy="0.001" iyz="0.0" 
+             izz="0.001" />
+  </inertial>
+</link>
+
+<joint name="base_to_left_rear_castor_wheel" type="fixed">
+	<parent link="base_link"/>
+	<child link="left_rear_castor_wheel"/>
+	<origin rpy="0 0 0" xyz="-${base_x_origin_to_castorwheel_origin} ${base_y_origin_to_castorwheel_origin} ${wheel_radius-robot_height}"/>
+</joint>
+
+<!-- Right front -->
+<link name="right_front_castor_wheel">
+	<visual>
+		<geometry>
+			<sphere radius="${wheel_radius}"/>
+		</geometry>	
+		<material name="white"/>
+	</visual> 
+  <collision>
+    <geometry>
+      <sphere radius="${wheel_radius}" />
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="${castor_wheel_mass}" />
+    <origin xyz="0 0 0" />        
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+             iyy="0.001" iyz="0.0" 
+             izz="0.001" />
+  </inertial>
+</link>
+
+<joint name="base_to_right_front_castor_wheel" type="fixed">
+	<parent link="base_link"/>
+	<child link="right_front_castor_wheel"/>
+	<origin rpy="0 0 0" xyz="${base_x_origin_to_castorwheel_origin} -${base_y_origin_to_castorwheel_origin} ${wheel_radius-robot_height}"/>
+</joint>
+
+<!-- Left rear -->
+<link name="right_rear_castor_wheel">
+	<visual>
+		<geometry>
+			<sphere radius="${wheel_radius}"/>
+		</geometry>
+		<material name="white"/>
+	</visual>
+  <collision>
+    <geometry>
+      <sphere radius="${wheel_radius}" />
+    </geometry>
+  </collision>
+  <inertial>
+    <mass value="${castor_wheel_mass}" />
+    <origin xyz="0 0 0" />        
+    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
+             iyy="0.001" iyz="0.0" 
+             izz="0.001" />
+  </inertial>
+</link>
+
+<joint name="base_to_right_rear_castor_wheel" type="fixed">
+	<parent link="base_link"/>
+	<child link="right_rear_castor_wheel"/>
+	<origin rpy="0 0 0" xyz="-${base_x_origin_to_castorwheel_origin} -${base_y_origin_to_castorwheel_origin} ${wheel_radius-robot_height}"/>
+</joint>
+
+
+<!--                    Differential drive controller       -->
+<!--
+<gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>40</updateRate>
+        <legacyMode>false</legacyMode>
+        <leftJoint>base_right_wheel_joint</leftJoint>
+        <rightJoint>base_left_wheel_joint</rightJoint>
+        <wheelSeparation>${wheel_ext_s2s_distance-wheel_thickness}</wheelSeparation>
+        <wheelDiameter>${2*wheel_radius}</wheelDiameter>
+        <torque>5</torque>
+        <commandTopic>cmd_vel</commandTopic>
+        <odometryTopic>odom</odometryTopic>
+        <odometryFrame>odom</odometryFrame>
+        <robotBaseFrame>base_link</robotBaseFrame>
+        <publishWheelTF>false</publishWheelTF>
+        <publishWheelJointState>false</publishWheelJointState>
+        <rosDebugLevel>na</rosDebugLevel>
+        <wheelAcceleration>0</wheelAcceleration>
+        <wheelTorque>5</wheelTorque>
+        <odometrySource>world</odometrySource>
+        <publishTf>1</publishTf>
+    </plugin>
+</gazebo>
+-->
+
+<!-- 
+  <gazebo>
+    <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+
+      <rosDebugLevel>Debug</rosDebugLevel>
+      <publishWheelTF>false</publishWheelTF>
+      <robotNamespace>/</robotNamespace>
+      <publishTf>1</publishTf>
+      <publishWheelJointState>false</publishWheelJointState>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <leftJoint>front_left_wheel_joint</leftJoint>
+      <rightJoint>front_right_wheel_joint</rightJoint>
+      <wheelSeparation>${wheel_ext_s2s_distance-wheel_thickness}</wheelSeparation>
+      <wheelDiameter>${2*wheel_radius}</wheelDiameter>
+
+      <legacyMode>true</legacyMode>
+      <odometrySource>world</odometrySource>
+
+      <broadcastTF>1</broadcastTF>
+      <wheelTorque>30</wheelTorque>
+      <wheelAcceleration>1.8</wheelAcceleration>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryFrame>odom</odometryFrame> 
+      <odometryTopic>odom</odometryTopic> 
+      <robotBaseFrame>base_footprint</robotBaseFrame>
+
+
+    </plugin>
+</gazebo> 
+-->
+
+
+  <!-- Gazebo plugin for ROS Control -->
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/</robotNamespace>
+    </plugin>
+</gazebo>
+
+
+  <!--                GAZEBO RELATED PART                             -->
+
+  <!-- ROS Control plugin for Gazebo 
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/mir100_model</robotNamespace>
+    </plugin>
+  </gazebo>
+-->
+  <!-- transmission 
+  <transmission name="base_to_right_wheel_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <actuator name="motor1">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+    <joint name="base_to_right_wheel">
+      <hardwareInterface>EffortJointInterface</hardwareInterface>
+    </joint>
+  </transmission>
+-->
+
+
+
+</robot>

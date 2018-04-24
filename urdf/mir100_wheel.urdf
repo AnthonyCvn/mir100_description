@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<robot name="mir100">
+
+  <!-- Material definition -->
+  <material name="black">
+    <color rgba="0 0 0 1"/>
+  </material>
+
+  <material name="white">
+    <color rgba="1 1 1 1"/>
+  </material>
+
+  <material name="blue">
+    <color rgba="0 0 0.8 1"/>
+  </material>
+
+  <!-- Base link -->
+  <link name="base_link">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0.209"/>
+      <geometry>
+        <box size="0.9 0.6 0.298"/>
+      </geometry>
+      <material name="white"/>
+    </visual>
+  </link>
+
+  <!-- Right wheels and joint to base link -->
+  <link name="right_front_wheel">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="right_front_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_front_wheel"/>
+    <origin rpy="0 0 0" xyz="0.31 0.205 0.03"/>
+  </joint>
+
+  <link name="right_back_wheel">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="right_back_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_back_wheel"/>
+    <origin rpy="0 0 0" xyz="-0.31 0.205 0.03"/>
+  </joint>
+
+  <link name="right_wheel">
+    <visual>
+      <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+  </link>
+  <joint name="right_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="right_wheel"/>
+    <origin rpy="0 0 0" xyz="0 0.275 0.03"/>
+  </joint>
+
+  <!-- Left wheels and joint to base link -->
+  <link name="left_front_wheel">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="left_front_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_front_wheel"/>
+    <origin rpy="0 0 0" xyz="0.31 -0.205 0.03"/>
+  </joint>
+
+  <link name="left_back_wheel">
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+  </link>
+  <joint name="left_back_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_back_wheel"/>
+    <origin rpy="0 0 0" xyz="-0.31 -0.205 0.03"/>
+  </joint>
+
+  <link name="left_wheel">
+    <visual>
+      <origin rpy="1.57075 0 0" xyz="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05" radius="0.03"/>
+      </geometry>
+      <material name="blue"/>
+    </visual>
+  </link>
+  <joint name="left_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="left_wheel"/>
+    <origin rpy="0 0 0" xyz="0 -0.275 0.03"/>
+  </joint>
+
+</robot>
