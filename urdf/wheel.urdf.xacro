@@ -6,20 +6,20 @@
       <visual>
         <origin xyz="0 0 0" rpy="${flipY*pi/2} 0  0 " /> 
         <geometry>
-          <cylinder length="${wheel_thickness}" radius="${wheel_radius}" />
+          <cylinder length="${wheel_thickness}" radius="${motor_wheel_radius+motor_wheel_epsilon}" />
         </geometry>
         <material name="DarkGray" />
       </visual>
       <collision>
         <origin xyz="0 0 0" rpy="${flipY*pi/2} 0 0 " />
         <geometry>
-          <cylinder length="${wheel_thickness}" radius="${wheel_radius}" />
+          <cylinder length="${wheel_thickness}" radius="${motor_wheel_radius+motor_wheel_epsilon}" />
         </geometry>
       </collision>
       <inertial>
         <mass value="${motor_wheel_mass}" />
         <origin xyz="0 0 0" />
-        <cylinder_inertia  m="${motor_wheel_mass}" r="${wheel_radius}" h="${wheel_thickness}" />
+        <cylinder_inertia  m="${motor_wheel_mass}" r="${motor_wheel_radius}" h="${wheel_thickness}" />
       </inertial>
     </link>
 
@@ -28,7 +28,6 @@
       <mu2 value="1.0"/>
       <kp  value="10000000.0" />
       <kd  value="1.0" />
-      <fdir1 value="1 0 0"/>
       <material>Gazebo/Grey</material>
       <turnGravityOff>false</turnGravityOff>
     </gazebo>
@@ -48,7 +47,7 @@
         <mechanicalReduction>1</mechanicalReduction>
       </actuator>
       <joint name="${lr}_wheel_joint">
-        <hardwareInterface>VelocityJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
       </joint>
     </transmission>
    
