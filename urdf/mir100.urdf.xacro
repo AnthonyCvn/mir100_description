@@ -30,7 +30,7 @@
 <!-- All mass in kg-->
 <xacro:property name="motor_wheel_mass" value="1.5" />
 <xacro:property name="castor_wheel_mass" value="1.5" />
-<xacro:property name="body_mass" value="10" />
+<xacro:property name="body_mass" value="67" />
 
 <!--                    MATERIAL DEFINITION                         -->
 <material name="black">
@@ -244,7 +244,7 @@
 <!--                    GAZEBO PLUGIN ROS CONTROL                        -->
 <gazebo>
   <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
-    <robotNamespace>/</robotNamespace>
+    <!-- no robotNamespace>/</robotNamespace> for multi-robobt integration -->
   </plugin>
 </gazebo>
 
