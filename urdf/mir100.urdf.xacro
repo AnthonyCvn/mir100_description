@@ -5,13 +5,10 @@
   
 <!--                          PROPERTY LIST                         -->
 <!-- Robot's dimensions -->
-<xacro:property name="body_height" value="0.300" />
+<xacro:property name="body_height" value="0.270" />
 <xacro:property name="body_width" value="0.550" />
 <xacro:property name="body_len" value="0.900" />
 <xacro:property name="robot_height" value="0.350" />
-
-<!-- Mathematical constant -->
-<xacro:property name="deg2rad" value="0.017453293" />
 
 <!-- Castor wheels -->
 <xacro:property name="base_x_origin_to_castorwheel_origin" value="0.310" />
@@ -27,10 +24,20 @@
 <xacro:property name="base_y_origin_to_wheel_origin" value="${(wheel_ext_s2s_distance-wheel_thickness)/2}" />
 <xacro:property name="base_z_origin_to_wheel_origin" value="${motor_wheel_radius-robot_height}" />
 
+<!-- Differential driver parameters -->
+<xacro:property name="wheel_separation" value="${(wheel_ext_s2s_distance-wheel_thickness)}" />
+<xacro:property name="wheel_radius" value="${motor_wheel_epsilon + motor_wheel_epsilon}" />
+
 <!-- All mass in kg-->
-<xacro:property name="motor_wheel_mass" value="1.5" />
-<xacro:property name="castor_wheel_mass" value="1.5" />
+<xacro:property name="motor_wheel_mass" value="1" />
+<xacro:property name="castor_wheel_mass" value="1" />
 <xacro:property name="body_mass" value="67" />
+
+<!-- Friction-->
+<xacro:property name="coulomb_friction_first_direction" value="0.01" />
+<xacro:property name="coulomb_friction_second_direction" value="0.01" />
+
+
 
 <!--                    MATERIAL DEFINITION                         -->
 <material name="black">
@@ -61,7 +68,9 @@
 <xacro:macro name="default_inertial" params="mass">
   <inertial>
     <mass value="${mass}" />
-    <inertia ixx="1.0" ixy="0.0" ixz="0.0" iyy="1.0" iyz="0.0" izz="1.0" />
+    <inertia ixx="1.0" ixy="0.0" ixz="0.0" 
+             iyy="1.0" iyz="0.0"
+             izz="1.0" />
   </inertial>
 </xacro:macro>
 
@@ -87,21 +96,22 @@
 <gazebo reference="base_footprint">
   <turnGravityOff>false</turnGravityOff>
 </gazebo>
-
-<joint name="base_footprint_joint" type="fixed">
-  <origin xyz="0 0 ${robot_height}" rpy="0 0 0" />
-  <parent link="base_footprint"/>
-  <child link="base_link" />
-</joint>
   
 <!--                    BASE LINK                                 -->
 <link name="base_link">
 	<visual>
+
+
+      <geometry>
+        <mesh filename="package://mir100_description/meshes/body.dae"/>
+      </geometry>
+<!--
 			<geometry>
 				<box size="${body_len} ${body_width} ${body_height}"/>
 			</geometry>
+-->
 			<origin rpy="0 0 0" xyz="0 0 -${body_height/2}"/>
-		<material name="white"/>
+	
 	</visual>
 	<collision>
 		<geometry>
@@ -116,16 +126,21 @@
 	</inertial>
 </link>
 
+<joint name="base_footprint_joint" type="fixed">
+  <origin xyz="0 0 ${robot_height}" rpy="0 0 0" />
+  <parent link="base_footprint"/>
+  <child link="base_link" />
+</joint>
 
 <gazebo reference="base_link">
 	<turnGravityOff>false</turnGravityOff>
 </gazebo>
 
 
+
 <!--                    MOTOR WHEELS                             -->
 <wheel lr="left" parent="base_link" translateX="0" translateY="1" flipY="1"/>
 <wheel lr="right" parent="base_link" translateX="0" translateY="-1" flipY="1"/>
-
 
 <!--                    CASTOR WHEELS                            -->
 <!-- Left front -->
@@ -141,13 +156,7 @@
       <sphere radius="${castor_wheel_radius}" />
     </geometry>
   </collision>
-  <inertial>
-    <mass value="${castor_wheel_mass}" />
-    <origin xyz="0 0 0" />        
-    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-             iyy="0.001" iyz="0.0" 
-             izz="0.001" />
-  </inertial>
+  <xacro:default_inertial mass="${castor_wheel_mass}"/>
 </link>
 
 <joint name="base_to_left_front_castor_wheel" type="fixed">
@@ -169,13 +178,7 @@
       <sphere radius="${castor_wheel_radius}" />
     </geometry>
   </collision>
-  <inertial>
-    <mass value="${castor_wheel_mass}" />
-    <origin xyz="0 0 0" />        
-    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-             iyy="0.001" iyz="0.0" 
-             izz="0.001" />
-  </inertial>
+  <xacro:default_inertial mass="${castor_wheel_mass}"/>
 </link>
 
 <joint name="base_to_left_rear_castor_wheel" type="fixed">
@@ -197,13 +200,7 @@
       <sphere radius="${castor_wheel_radius}" />
     </geometry>
   </collision>
-  <inertial>
-    <mass value="${castor_wheel_mass}" />
-    <origin xyz="0 0 0" />        
-    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-             iyy="0.001" iyz="0.0" 
-             izz="0.001" />
-  </inertial>
+  <xacro:default_inertial mass="${castor_wheel_mass}"/>
 </link>
 
 <joint name="base_to_right_front_castor_wheel" type="fixed">
@@ -225,13 +222,7 @@
       <sphere radius="${castor_wheel_radius}" />
     </geometry>
   </collision>
-  <inertial>
-    <mass value="${castor_wheel_mass}" />
-    <origin xyz="0 0 0" />        
-    <inertia ixx="0.001" ixy="0.0" ixz="0.0"
-             iyy="0.001" iyz="0.0" 
-             izz="0.001" />
-  </inertial>
+  <xacro:default_inertial mass="${castor_wheel_mass}"/>
 </link>
 
 <joint name="base_to_right_rear_castor_wheel" type="fixed">
@@ -240,6 +231,32 @@
   <origin rpy="0 0 0" xyz="-${base_x_origin_to_castorwheel_origin} -${base_y_origin_to_castorwheel_origin} ${castor_wheel_radius-robot_height}"/>
 </joint>
 
+<!--                    GAZEBO FRICTION                                  -->
+<gazebo reference="base_link">
+  <mu1>${coulomb_friction_first_direction}</mu1>
+  <mu2>${coulomb_friction_second_direction}</mu2>
+  <material>Gazebo/white</material>
+</gazebo>
+<gazebo reference="left_front_castor_wheel">
+  <mu1>${coulomb_friction_first_direction}</mu1>
+  <mu2>${coulomb_friction_second_direction}</mu2>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="right_front_castor_wheel">
+  <mu1>${coulomb_friction_first_direction}</mu1>
+  <mu2>${coulomb_friction_second_direction}</mu2>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="left_rear_castor_wheel">
+  <mu1>${coulomb_friction_first_direction}</mu1>
+  <mu2>${coulomb_friction_second_direction}</mu2>
+  <material>Gazebo/Black</material>
+</gazebo>
+<gazebo reference="right_rear_castor_wheel">
+  <mu1>${coulomb_friction_first_direction}</mu1>
+  <mu2>${coulomb_friction_second_direction}</mu2>
+  <material>Gazebo/Black</material>
+</gazebo>
 
 <!--                    GAZEBO PLUGIN ROS CONTROL                        -->
 <gazebo>

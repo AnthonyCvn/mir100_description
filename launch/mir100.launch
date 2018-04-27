@@ -3,43 +3,34 @@
 
 	<arg name="robot_name"/>
     <arg name="init_pose"/>
-
-
-
-
-
+    <arg name="config_file"/>
 	<arg name="mir100_model" default="$(find mir100_description)/urdf/mir100.urdf.xacro"/>
-	<param name="/robot0/robot_description" command="$(find xacro)/xacro --inorder $(arg mir100_model)"/>
 
+	<!-- Load ROS controller and joints state settings in ROS param server -->
+	<rosparam command="load" ns="/$(arg robot_name)"
+	          file="$(find gpss_description)/config/$(arg config_file)"/>
 
-
-
+	<!-- Push robot_description and spawn robot in gazebo -->
+	<param name="/$(arg robot_name)/robot_description" command="$(find xacro)/xacro --inorder $(arg mir100_model)"/>
 
   	<node name="robot_spawner" pkg="gazebo_ros" type="spawn_model"
         args="$(arg init_pose) -urdf -model $(arg robot_name) -param robot_description --timeout 50" respawn="false" output="screen" />
+
 
   	<!-- Launch the robot state publisher -->
   	<node pkg="robot_state_publisher" type="robot_state_publisher"  name="robot_state_publisher">
     	<param name="publish_frequency" type="double" value="30.0" />
   	</node>
 
-	<rosparam command="load" 
-		file="$(find mir100_description)/config/joint_state_controller.yaml"
-		ns="/robot0/joint_state_controller" />
-
-	<!-- Load differential drive parameters -->
-	<rosparam command="load"
-	        file="$(find mir100_description)/config/diffdrive.yaml"
-	        ns="/robot0/diff_drive_controller" />
 
 	<!-- Launch differential drive controller -->
 	<node name="mir100_controller_spawner" pkg="controller_manager" type="spawner"
-	      args="--namespace=/robot0 diff_drive_controller joint_state_controller">
+	      args="--namespace=/$(arg robot_name) diff_drive_controller joint_state_controller">
 	</node>
 
 	<!-- Launch GUI controller -->
 	<node name="rqt_robot_steering" pkg="rqt_robot_steering" type="rqt_robot_steering">
-		<param name="default_topic" value="/robot0/diff_drive_controller/cmd_vel"/>
+		<param name="default_topic" value="/$(arg robot_name)/diff_drive_controller/cmd_vel"/>
 	</node>
 
 </launch>
